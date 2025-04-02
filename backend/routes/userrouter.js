@@ -11,6 +11,10 @@ router.post('/register', [
     body('password').isLength({ min: 4 }).withMessage('Password should be at least 4 characters')
 ], usercontroller.registerUser);
 
+router.post('/login', [
+    body('email').isEmail().withMessage('Invalid email'),
+    body('password').isLength({ min: 4 }).withMessage('Password should be at least 4 characters')
+], usercontroller.loginUser);
 
 
 
