@@ -2,10 +2,11 @@ const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const usermodel = require("../models/user");
 const { generatetoken } = require("./../jwt");
+const blacklisteduser = require("../models/blacklisteduser");
 
 module.exports.registerUser = async (req, res, next) => {
     try {
-      
+
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -21,12 +22,12 @@ module.exports.registerUser = async (req, res, next) => {
         }
         console.log("Extracted Values:", { firstname, lastname, email, password });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+      
 
         const user = await usermodel.create({
             username: { firstname, lastname },
             email,
-            password: hashedPassword,
+            password,
         });
 
         // Generate JWT token
@@ -47,28 +48,65 @@ module.exports.loginUser = async (req, res, next) => {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-
         const { email, password } = req.body;
-        console.log("Received request body:", req.body);
+        console.log("Received Request Body:", req.body);
 
         if (!email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ error: "All fields are required" });
         }
 
-        console.log("Extracted values:", { email, password });
         const user = await usermodel.findOne({ email });
-
-        if ( !user || !(await user.comparePassword(password))) {
-            return res.status(401).json({ error: 'Invalid user or password' });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ error: "Invalid credentials" });
         }
 
+
+        // Generate JWT token
         const payload = { id: user._id };
         const token = generatetoken(payload);
 
         res.json({ token, user });
-
     } catch (err) {
         console.error("Error in loginUser:", err);
         next(err);
     }
 };
+
+module.exports.userprofile = async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const userId = req.user.id;
+        console.log("User ID from token:", userId);
+        const user = await usermodel.findById(userId);
+        if (!user) {
+            return res.status(402).json({ error: "User not found" })
+        }
+        res.json({ user })
+
+    } catch (err) {
+        console.error("Error in userProfile:", err);
+        next(err);
+    }
+}
+
+module.exports.userLogout = async (req, res, next) => {
+    try {
+       
+        res.clearCookie("token");
+        const token= res.cookies?.token||req.headers.authorization?.split(" ")[1];
+        console.log("Token from request:", token);
+        await blacklisteduser.create({token})
+    
+        res.status(200).json({ message: "Logout successful" });
+    }catch(err){
+        console.error("Error in userLogout:", err);
+        next(err);
+    }
+}

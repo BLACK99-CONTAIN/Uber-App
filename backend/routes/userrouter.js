@@ -16,6 +16,6 @@ router.post('/login', [
     body('password').isLength({ min: 4 }).withMessage('Password should be at least 4 characters')
 ], usercontroller.loginUser);
 
-
-
+router.get('/profile', jwtMiddleware, usercontroller.userprofile);
+router.get('/logout',jwtMiddleware,usercontroller.userLogout);
 module.exports=router
