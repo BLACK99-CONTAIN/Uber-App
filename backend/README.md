@@ -284,18 +284,6 @@ The `blacklisteduser` collection is used to store JWT tokens that have been inva
 
 ---
 
-### Example Request for `/users/logout`
-```bash
-curl -X GET http://localhost:3000/users/logout \
--H "Authorization: Bearer <your-jwt-token>"
-```
-
-### Example Success Response
-```json
-{
-  "message": "Logout successful"
-}
-```
 # API Documentation for Captains
 
 ---
@@ -604,5 +592,64 @@ curl -X POST http://localhost:3000/captains/register \
   }
 }
 ```
+## Endpoint: `/captains/logout`
 
-Let me know if you need further updates or additional endpoints documented!
+### Description
+This endpoint is used to log out a captain by invalidating their JWT token. The token is added to the `blacklisteduser` collection to prevent further use.
+
+### Method
+`GET`
+
+### Headers
+- **Authorization**: `Bearer <JWT token>` (required)
+
+### Response
+
+#### Success Response
+- **Status Code:** `200 OK`
+- **Response Body:**
+  ```json
+  {
+    "message": "Logout successful"
+  }
+  ```
+
+#### Error Responses
+1. **Token Not Found**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "Token not found"
+     }
+     ```
+
+2. **Server Error**
+   - **Status Code:** `500 Internal Server Error`
+   - **Response Body:**
+     ```json
+     {
+       "error": "string (error message)"
+     }
+     ```
+
+---
+
+### Example Request for `/users/logout`
+```bash
+curl -X GET http://localhost:3000/users/logout \
+-H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Example Request for `/captains/logout`
+```bash
+curl -X GET http://localhost:3000/captains/logout \
+-H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Example Success Response
+```json
+{
+  "message": "Logout successful"
+}
+```
