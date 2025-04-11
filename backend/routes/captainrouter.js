@@ -23,4 +23,6 @@ router.post('/login', [
 ],captaincontroller.logincaptainUser);
 
 router.get('/profile',jwtMiddleware,captaincontroller.getcaptainProfile);
+
+router.get('/logout',jwtMiddleware,captaincontroller.logoutcaptainUser);
 module.exports=router;    

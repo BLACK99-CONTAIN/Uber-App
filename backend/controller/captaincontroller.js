@@ -3,6 +3,8 @@ const {validationResult} = require('express-validator');
 const bcrypt = require('bcrypt');
 const captainService = require('../services/captain.service');
 const { generatetoken } = require('./../jwt');
+const blacklisteduser = require('../models/blacklisteduser.js');
+
 module.exports.registercaptainUser = async (req, res, next) => {  
     try{
         const errors=validationResult(req);
@@ -87,6 +89,20 @@ module.exports.getcaptainProfile=async(req,res,next)=>{
         res.json({captain});
     }catch(err){
         console.error("Error in getcaptainProfile:", err);
+        next(err);
+    }
+}
+
+module.exports.logoutcaptainUser = async (req, res, next) => {
+    try {
+       
+        res.clearCookie("token");
+        const token= res.cookies?.token||req.headers.authorization?.split(" ")[1];
+        await blacklisteduser.create({token})
+    
+        res.status(200).json({ message: "Logout successful" });
+    }catch(err){
+        console.error("Error in userLogout:", err);
         next(err);
     }
 }
