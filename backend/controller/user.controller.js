@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const usermodel = require("../models/user");
 const { generatetoken } = require("./../jwt");
 const blacklisteduser = require("../models/blacklisteduser");
+const userService = require("../services/user.service");
 
 module.exports.registerUser = async (req, res, next) => {
     try {
@@ -110,3 +111,4 @@ module.exports.userLogout = async (req, res, next) => {
         next(err);
     }
 }
+

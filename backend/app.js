@@ -13,6 +13,9 @@ app.use(cookieParser())
 const userrouter = require('./routes/userrouter')
 app.use('/users',userrouter)
 
+const captainrouter = require('./routes/captainrouter');
+app.use('/captains',captainrouter)
+
 app.get('/',(req,res)=>{
     res.send("Hello world");
 })
