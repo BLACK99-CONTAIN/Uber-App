@@ -296,3 +296,313 @@ curl -X GET http://localhost:3000/users/logout \
   "message": "Logout successful"
 }
 ```
+# API Documentation for Captains
+
+---
+
+## Endpoint: `/captains/register`
+
+### Description
+This endpoint is used to register a new captain. It validates the input data, hashes the password, stores the captain in the database, and returns a JWT token along with the captain details.
+
+### Method
+`POST`
+
+### Request Body
+The following fields are required in the request body:
+
+```json
+{
+  "username": {
+    "firstname": "string (min length: 3, required)",
+    "lastname": "string (min length: 2, required)"
+  },
+  "email": "string (valid email format, required)",
+  "password": "string (min length: 4, required)",
+  "vehicle": {
+    "color": "string (min length: 3, required)",
+    "plate": "string (min length: 3, required)",
+    "capacity": "number (min: 1, required)",
+    "vehicleType": "string (enum: ['car', 'bike', 'auto'], required)"
+  }
+}
+```
+
+### Response
+
+#### Success Response
+- **Status Code:** `200 OK`
+- **Response Body:**
+  ```json
+  {
+    "token": "string (JWT token)",
+    "captainuser": {
+      "_id": "string (captain ID)",
+      "username": {
+        "firstname": "string",
+        "lastname": "string"
+      },
+      "email": "string",
+      "vehicle": {
+        "color": "string",
+        "plate": "string",
+        "capacity": "number",
+        "vehicleType": "string"
+      }
+    }
+  }
+  ```
+
+#### Error Responses
+1. **Validation Errors**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "errors": [
+         {
+           "msg": "string (error message)",
+           "param": "string (field name)",
+           "location": "string (location of the field, e.g., 'body')"
+         }
+       ]
+     }
+     ```
+
+2. **User Already Exists**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "User already exists"
+     }
+     ```
+
+3. **Missing Fields**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "All fields are required"
+     }
+     ```
+
+4. **Server Error**
+   - **Status Code:** `500 Internal Server Error`
+   - **Response Body:**
+     ```json
+     {
+       "error": "string (error message)"
+     }
+     ```
+
+---
+
+## Endpoint: `/captains/login`
+
+### Description
+This endpoint is used to authenticate a captain. It validates the input data, checks the captain's credentials, and returns a JWT token if the login is successful.
+
+### Method
+`POST`
+
+### Request Body
+The following fields are required in the request body:
+
+```json
+{
+  "email": "string (valid email format, required)",
+  "password": "string (min length: 4, required)"
+}
+```
+
+### Response
+
+#### Success Response
+- **Status Code:** `200 OK`
+- **Response Body:**
+  ```json
+  {
+    "token": "string (JWT token)",
+    "captainuser": {
+      "_id": "string (captain ID)",
+      "username": {
+        "firstname": "string",
+        "lastname": "string"
+      },
+      "email": "string",
+      "vehicle": {
+        "color": "string",
+        "plate": "string",
+        "capacity": "number",
+        "vehicleType": "string"
+      }
+    }
+  }
+  ```
+
+#### Error Responses
+1. **Validation Errors**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "errors": [
+         {
+           "msg": "string (error message)",
+           "param": "string (field name)",
+           "location": "string (location of the field, e.g., 'body')"
+         }
+       ]
+     }
+     ```
+
+2. **Invalid Credentials**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "Invalid credentials"
+     }
+     ```
+
+3. **User Not Found**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "User not found"
+     }
+     ```
+
+4. **Missing Fields**
+   - **Status Code:** `400 Bad Request`
+   - **Response Body:**
+     ```json
+     {
+       "error": "All fields are required"
+     }
+     ```
+
+5. **Server Error**
+   - **Status Code:** `500 Internal Server Error`
+   - **Response Body:**
+     ```json
+     {
+       "error": "string (error message)"
+     }
+     ```
+
+---
+
+## Endpoint: `/captains/profile`
+
+### Description
+This endpoint is used to retrieve the profile of the currently logged-in captain. It requires a valid JWT token to access the captain's profile.
+
+### Method
+`GET`
+
+### Headers
+- **Authorization**: `Bearer <JWT token>` (required)
+
+### Response
+
+#### Success Response
+- **Status Code:** `200 OK`
+- **Response Body:**
+  ```json
+  {
+    "captain": {
+      "_id": "string (captain ID)",
+      "username": {
+        "firstname": "string",
+        "lastname": "string"
+      },
+      "email": "string",
+      "vehicle": {
+        "color": "string",
+        "plate": "string",
+        "capacity": "number",
+        "vehicleType": "string"
+      },
+      "location": {
+        "latitude": "number",
+        "longitude": "number"
+      }
+    }
+  }
+  ```
+
+#### Error Responses
+1. **Unauthorized**
+   - **Status Code:** `401 Unauthorized`
+   - **Response Body:**
+     ```json
+     {
+       "error": "Token not found"
+     }
+     ```
+
+2. **Captain Not Found**
+   - **Status Code:** `404 Not Found`
+   - **Response Body:**
+     ```json
+     {
+       "error": "Captain is not found"
+     }
+     ```
+
+3. **Server Error**
+   - **Status Code:** `500 Internal Server Error`
+   - **Response Body:**
+     ```json
+     {
+       "error": "string (error message)"
+     }
+     ```
+
+---
+
+### Example Request for `/captains/register`
+```bash
+curl -X POST http://localhost:3000/captains/register \
+-H "Content-Type: application/json" \
+-d '{
+  "username": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "Red",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}'
+```
+
+### Example Success Response
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captainuser": {
+    "_id": "64f1c2e5b5d6c2a1e4f3b2d1",
+    "username": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }
+}
+```
+
+Let me know if you need further updates or additional endpoints documented!
